@@ -499,9 +499,9 @@ CI(GitHub Actions、プルリクエストごと):
 
 Claude Code:
 
-- Laravel Boost を開発用に入れる。boost:install で Claude Code と、Agent Skills の filament/filament を選ぶ
-- 生成される CLAUDE.md もコミットする
-- プロジェクト独自のルールは再生成で消えないよう .ai/guidelines/ に置く(用語集、禁止事項、テスト必須、AI に勝手にコミット・push させない など)
+- Laravel Boost を開発用に入れる。boost:install で Claude Code・Codex・OpenCode の3つのエージェントと、Agent Skills の filament/filament を選ぶ
+- Boost が各エージェント向けの指針を生成する。CLAUDE.md・AGENTS.md・opencode.json・.codex/・.claude/skills/・.agents/skills/ もコミットする(.codex/ は .gitignore で除外されているため `git add -f` で追加)
+- プロジェクト独自のルールは再生成で消えないよう .ai/guidelines/ に置く(用語集、禁止事項、テスト必須、AI に勝手にコミット・push させない など)。`php artisan boost:update` で、すべてのエージェントの指針に反映される
 - 1つの課題の流れ:計画 → 確認 → 実装 → テストを書いて実行 → 差分を読む → PR → CI が通ったらマージ
 
 完了の条件(PR ごと):
