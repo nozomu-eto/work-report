@@ -1,58 +1,70 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# 作業報告書作成ツール
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+清掃・点検・退去立会いなど、業種を問わず使える作業報告書作成アプリです。作業者がスマホで入力して提出し、管理者が承認・差し戻しをして、承認済みの報告書を PDF で出力します。業種ごとの違いはテンプレート(JSON)の差し替えで吸収します。
 
-## About Laravel
+設計は [docs/design.md](docs/design.md) を正とします。
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## 技術構成
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+| 項目 | 内容 |
+| --- | --- |
+| フレームワーク | Laravel 13 |
+| 画面 | Filament 5(/admin:管理者、/app:作業者) |
+| PHP | 8.5 |
+| DB | MariaDB 12.3 LTS |
+| テスト | Pest 5 |
+| 静的解析・整形 | Larastan 3、Pint |
+| CI | GitHub Actions |
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## ローカルの起動手順
 
-## Learning Laravel
+前提:Laravel Herd、Docker(Compose)、PHP 8.5(`herd isolate 8.5`)。
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+```sh
+# 依存パッケージ
+composer install
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+# 環境設定(.env は管理しない。.env.example からコピー)
+cp .env.example .env
+php artisan key:generate
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+# DB の起動(MariaDB 12.3。127.0.0.1:3306)
+docker compose up -d
 
-## Agentic Development
-
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
-
-```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+# マイグレーションと動作確認用ユーザー
+php artisan migrate
+php artisan db:seed
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+Herd のサイトとして開き、`/admin` と `/app` からログインできます。
 
-## Contributing
+| 役割 | メール | パスワード | 入れるパネル |
+| --- | --- | --- | --- |
+| 管理者 | admin@example.com | password | /admin |
+| 作業者 | worker@example.com | password | /app |
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### テスト
 
-## Code of Conduct
+テストは SQLite ではなく MariaDB のテスト用DB(`work_report_testing`)で動かします。`compose.yaml` の初期化スクリプト(`docker/mariadb/initdb/`)が最初の起動時に作成します。
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+すでに作成済みのボリュームには初期化スクリプトが効かないため、その場合は手動で作成します。
 
-## Security Vulnerabilities
+```sh
+docker compose exec mariadb mariadb -uroot -ppassword \
+  -e "CREATE DATABASE IF NOT EXISTS work_report_testing"
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+```sh
+./vendor/bin/pest                          # テスト
+./vendor/bin/pint --test                   # コードスタイル(--test なしで自動修正)
+./vendor/bin/phpstan analyse               # 静的解析
+composer audit                             # 依存パッケージの脆弱性チェック
+```
 
-## License
+## 開発の進め方
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+GitHub Flow(作業ごとのブランチ → プルリクエスト → CI が通ったらマージ)です。CI は Pint・Larastan・Pest・composer audit を実行します。詳細は設計書の 10-8 を参照してください。
+
+## AIの使い方
+
+(あとで書く)

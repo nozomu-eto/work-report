@@ -8,6 +8,7 @@ services:
       MARIADB_DATABASE: work_report
     volumes:
       - mariadb-data:/var/lib/mysql
+      - ./docker/mariadb/initdb:/docker-entrypoint-initdb.d:ro
 
 volumes:
   mariadb-data:

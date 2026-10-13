@@ -2,24 +2,25 @@
 
 namespace Database\Seeders;
 
+use App\Enums\UserRole;
 use App\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
 {
-    use WithoutModelEvents;
-
     /**
-     * Seed the application's database.
+     * 動作確認用のユーザー(パスワードはどちらも password)。
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        User::query()->updateOrCreate(
+            ['email' => 'admin@example.com'],
+            ['name' => '管理者', 'password' => 'password', 'role' => UserRole::Admin, 'is_active' => true],
+        );
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+        User::query()->updateOrCreate(
+            ['email' => 'worker@example.com'],
+            ['name' => '作業者', 'password' => 'password', 'role' => UserRole::Worker, 'is_active' => true],
+        );
     }
 }
