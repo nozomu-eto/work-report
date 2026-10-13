@@ -1,0 +1,13 @@
+includes:
+    - vendor/larastan/larastan/extension.neon
+    - vendor/nesbot/carbon/extension.neon
+
+parameters:
+    paths:
+        - app/
+        - database/
+        - routes/
+
+    level: 5
+    # casts() の中身を解析させる(既定では PHPDoc の型しか見ず、enum キャストが string と誤判定されるため)
+    parseModelCastsMethod: true
